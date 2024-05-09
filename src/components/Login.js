@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import Header from "./Header";
 import "../App.css";
 import { validateEmail, validatePassword, validateUserName } from "../utils/validateForm";
+import { auth } from "../utils/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = () => {
 
@@ -9,22 +11,51 @@ const Login = () => {
   const [emailErrorMessage, setemailErrorMessage] = useState("");
   const [passowrdErrorMessage, setpasswordErrorMessage] = useState("");
   const [usernameErrorMessage, setusernameErrorMessage] = useState("");
+  const [errorMsg,seterrorMsg] = useState("");
 
   const username = useRef();
   const email = useRef();
   const password = useRef();
 
   const handleSignInForm = () => {
-    if(signup){
-      const usernameError = validateUserName(username.current.value);
-      setusernameErrorMessage(usernameError);
-    }
-
+  
     const emailError = validateEmail(email.current.value);
     const passwordError = validatePassword(password.current.value);
 
     setemailErrorMessage(emailError);
     setpasswordErrorMessage(passwordError);
+
+    if(emailError !== null || passwordError !== null) return;
+
+    if(signup){
+      const usernameError = validateUserName(username.current.value);
+      setusernameErrorMessage(usernameError);
+
+      createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          seterrorMsg(errorCode + " - " + errorMessage)
+        });
+      
+    }else{
+
+      signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        seterrorMsg(errorCode + " - " + errorMessage);
+      });
+    }
+
   };
 
   return (
@@ -70,6 +101,7 @@ const Login = () => {
             placeholder="Password"
           />
           <p className="text-red-600">{passowrdErrorMessage}</p>
+          <p className="text-red-600">{errorMsg}</p>
           <button
             type="submit"
             className="bg-red-600 text-white w-full p-2 my-4 rounded-sm"
