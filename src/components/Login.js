@@ -1,61 +1,92 @@
 import React, { useState, useRef } from "react";
 import Header from "./Header";
 import "../App.css";
-import { validateEmail, validatePassword, validateUserName } from "../utils/validateForm";
+import {
+  validateEmail,
+  validatePassword,
+  validateUserName,
+} from "../utils/validateForm";
 import { auth } from "../utils/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const Login = () => {
-
   const [signup, setsignup] = useState(false);
   const [emailErrorMessage, setemailErrorMessage] = useState("");
   const [passowrdErrorMessage, setpasswordErrorMessage] = useState("");
   const [usernameErrorMessage, setusernameErrorMessage] = useState("");
-  const [errorMsg,seterrorMsg] = useState("");
+  const [errorMsg, seterrorMsg] = useState("");
+
+  const navigate = useNavigate();
+
+  const dispatch=useDispatch();
 
   const username = useRef();
   const email = useRef();
   const password = useRef();
 
   const handleSignInForm = () => {
-  
     const emailError = validateEmail(email.current.value);
     const passwordError = validatePassword(password.current.value);
 
     setemailErrorMessage(emailError);
     setpasswordErrorMessage(passwordError);
 
-    if(emailError !== null || passwordError !== null) return;
+    if (emailError !== null || passwordError !== null) return;
 
-    if(signup){
+    if (signup) {
       const usernameError = validateUserName(username.current.value);
       setusernameErrorMessage(usernameError);
 
-      createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
         .then((userCredential) => {
-          // Signed up 
+          // Signed up
           const user = userCredential.user;
+          updateProfile(user, {
+            displayName: username.current.value,
+            photoURL: "https://th.bing.com/th/id/OIP.-d8GY5axNJZYoXsNOUJ4iwAAAA?rs=1&pid=ImgDetMain",
+          })
+            .then(() => {
+              const {uid,email,displayName,photoURL} = auth.currentUser;
+              dispatch(addUser({uid:uid,email:email,displayName:displayName,photoURL:photoURL}))
+            })
+            .catch((error) => {
+            });
+
+          navigate("./browse");
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          seterrorMsg(errorCode + " - " + errorMessage)
+          seterrorMsg(errorCode + " - " + errorMessage);
         });
-      
-    }else{
-
-      signInWithEmailAndPassword(auth, email.current.value, password.current.value)
-      .then((userCredential) => {
-        // Signed in 
-        const user = userCredential.user;
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        seterrorMsg(errorCode + " - " + errorMessage);
-      });
+    } else {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          navigate("./browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          seterrorMsg(errorCode + " - " + errorMessage);
+        });
     }
-
   };
 
   return (
@@ -79,13 +110,13 @@ const Login = () => {
           {signup && (
             <div>
               <input
-              ref={username}
-              type="text"
-              className="p-2 my-4 w-full rounded-sm opacity-70"
-              placeholder="Your Name"
-            />
-            <p className="text-red-600">{usernameErrorMessage}</p>
-            </div> 
+                ref={username}
+                type="text"
+                className="p-2 my-4 w-full rounded-sm opacity-70"
+                placeholder="Your Name"
+              />
+              <p className="text-red-600">{usernameErrorMessage}</p>
+            </div>
           )}
           <input
             ref={email}
