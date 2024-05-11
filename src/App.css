@@ -1,3 +1,8 @@
 .login-img {
     filter: brightness(50%);
   }
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+

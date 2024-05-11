@@ -37,7 +37,7 @@ const Login = () => {
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
-          updateProfile(user, {displayName: username.current.value, photoURL: "https://th.bing.com/th/id/OIP.-d8GY5axNJZYoXsNOUJ4iwAAAA?rs=1&pid=ImgDetMain"})
+          updateProfile(user, {displayName: username.current.value, photoURL: "https://i.pinimg.com/236x/54/6b/2d/546b2d4e9bddbcb894fa8e416739339b.jpg"})
             .then(() => {
               const {uid,email,displayName,photoURL} = auth.currentUser;
               dispatch(addUser({uid:uid,email:email,displayName:displayName,photoURL:photoURL}))

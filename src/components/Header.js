@@ -36,10 +36,10 @@ const Header = () => {
   },[])
 
   return (
-    <div className="absolute w-screen px-40 py-2 bg-gradient-to-b from-black z-40 flex justify-between">
+    <div className="absolute w-screen px-8 py-2 bg-gradient-to-b from-black z-40 flex justify-between">
         <img className='w-44' src='/assets/netflix-logo.png' alt='logo'/>
         {user &&  <div className="flex p-4">
-          <img src={user?.photoURL} className='w-10 h-10 mx-2'/>
+          <img src={user?.photoURL} className='w-10 h-10 mx-3 rounded-full'/>
           <button onClick={handleSignOut} className='text-white'>Sign Out</button>
         </div>}
     </div>
